@@ -1,0 +1,126 @@
+Sub 熱拡散の様子()
+
+'セルをリセット
+Cells.Clear
+
+'とりあえず全セル100に
+Dim fi As Integer
+Dim fj As Integer
+Dim column As Integer
+Dim row As Integer
+Debug.Print row
+row = Application.InputBox(Prompt:="型の幅を設定してくだ祭", Type:=1)
+coulmn = Application.InputBox(Prompt:="型の高さを設定してくだサイ", Type:=1)
+fi = 3
+fj = 7
+Cells(fi, fj).Value = 100
+
+For fi = 3 To coulmn
+    For fj = 7 To row
+    Cells(fi, fj).Value = 100
+    Next fj
+Next fi
+''
+
+'(4,6)-(22,25)を1000に
+Range(Cells(4, 11), Cells(coulmn - 4, row - 4)).Value = 1000
+''
+Dim kata As Double
+Dim metal As Double
+Dim Time As Double
+Dim t As Double
+Dim i As Integer
+Dim j As Integer
+Dim k(3 To 100, 2 To 100, 0 To 1000) As Double
+
+kata = Application.InputBox(Prompt:="鋳型の熱拡散率を入力してケロ", Type:=1)
+metal = Application.InputBox(Prompt:="溶融金属の熱拡散率を入力してケロ", Type:=1)
+Time = Application.InputBox(Prompt:="何秒後の温度分布を見たい?2以上の数値を入力してケロ", Type:=1)
+
+''空気の温度は100で固定
+For t = 0 To Time
+    For i = 3 To coulmn
+        k(i, 7, t) = 100
+        Cells(i, 7).Interior.ColorIndex = 8
+        k(i, row, t) = 100
+        Cells(i, row).Interior.ColorIndex = 8
+    Next i
+    
+    For j = 8 To row - 1
+        k(3, j, t) = 100
+        Cells(3, j).Interior.ColorIndex = 8
+        k(coulmn, j, t) = 100
+        Cells(coulmn, j).Interior.ColorIndex = 8
+    Next j
+Next t
+
+'掛け線追加
+Range(Cells(4, 10), Cells(coulmn - 4, 10)).Borders(xlEdgeRight).LineStyle = xlContinuous
+Range(Cells(4, row - 4), Cells(coulmn - 4, row - 4)).Borders(xlEdgeRight).LineStyle = xlContinuous
+Range(Cells(coulmn - 4, 11), Cells(coulmn - 4, row - 4)).Borders(xlEdgeBottom).LineStyle = xlContinuous
+
+
+''
+''t=0のとき
+For i = 4 To coulmn - 1
+    For j = 8 To row - 1
+        k(i, j, 0) = Cells(i, j).Value
+    Next j
+Next i
+
+
+''金属と型の温度分布
+For t = 1 To Time
+    For i = 4 To coulmn - 4
+        For j = 8 To 10
+            k(i, j, t) = kata * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 4 * k(i, j, t - 1)) + k(i, j, t - 1)
+            'k(i, j, t) = kata * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 8 * k(i, j, t - 1) + k(i - 1, j - 1, t - 1) + k(i - 1, j + 1, t - 1) + k(i + 1, j - 1, t - 1) + k(i + 1, j + 1, t - 1)) + k(i, j, t - 1)
+        Next j
+        
+        For j = 11 To row - 4
+            k(i, j, t) = metal * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 4 * k(i, j, t - 1)) + k(i, j, t - 1)
+            'k(i, j, t) = metal * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 8 * k(i, j, t - 1) + k(i - 1, j - 1, t - 1) + k(i - 1, j + 1, t - 1) + k(i + 1, j - 1, t - 1) + k(i + 1, j + 1, t - 1)) + k(i, j, t - 1)
+        Next j
+        
+        For j = row - 3 To row - 1
+            k(i, j, t) = kata * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 4 * k(i, j, t - 1)) + k(i, j, t - 1)
+            'k(i, j, t) = kata * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 8 * k(i, j, t - 1) + k(i - 1, j - 1, t - 1) + k(i - 1, j + 1, t - 1) + k(i + 1, j - 1, t - 1) + k(i + 1, j + 1, t - 1)) + k(i, j, t - 1)
+        Next j
+    Next i
+    
+    For i = coulmn - 3 To coulmn - 1
+        For j = 8 To row - 1
+            k(i, j, t) = kata * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 4 * k(i, j, t - 1)) + k(i, j, t - 1)
+            'k(i, j, t) = kata * (k(i, j - 1, t - 1) + k(i, j + 1, t - 1) + k(i - 1, j, t - 1) + k(i + 1, j, t - 1) - 8 * k(i, j, t - 1) + k(i - 1, j - 1, t - 1) + k(i - 1, j + 1, t - 1) + k(i + 1, j - 1, t - 1) + k(i + 1, j + 1, t - 1)) + k(i, j, t - 1)
+        Next j
+    Next i
+Next t
+'''
+''セルに代入
+For i = 4 To coulmn - 1
+    For j = 8 To row - 1
+        Cells(i, j).Value = k(i, j, Time)
+    Next j
+Next i
+
+''色も付ける
+For i = 4 To coulmn - 1
+    For j = 8 To row - 1
+        If Cells(i, j).Value > 950 Then
+        Cells(i, j).Interior.ColorIndex = 46
+        ElseIf Cells(i, j).Value > 800 Then
+        Cells(i, j).Interior.ColorIndex = 45
+        ElseIf Cells(i, j).Value > 700 Then
+        Cells(i, j).Interior.ColorIndex = 44
+        ElseIf Cells(i, j).Value > 500 Then
+        Cells(i, j).Interior.ColorIndex = 40
+        ElseIf Cells(i, j).Value > 300 Then
+        Cells(i, j).Interior.ColorIndex = 36
+        ElseIf Cells(i, j).Value <= 300 Then
+        Cells(i, j).Interior.ColorIndex = 19
+        End If
+    Next j
+Next i
+
+
+End Sub
